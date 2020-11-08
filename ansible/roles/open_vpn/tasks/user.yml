@@ -1,0 +1,15 @@
+---
+
+- name: set group
+  group:
+    name: "{{ open_vpn.usr_name }}"
+    state: present
+
+- name: set user
+  user:
+    shell: /usr/sbin/nologin
+    name: "{{ open_vpn.usr_name }}"
+    group: "{{ open_vpn.usr_name }}"
+    create_home: no
+    state: present
+    system: yes

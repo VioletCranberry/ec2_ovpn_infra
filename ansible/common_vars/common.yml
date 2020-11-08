@@ -1,0 +1,31 @@
+---
+
+_dynamic:
+  ip_source: "{{ ip_source | default (' ') }}"
+  ip_target: "{{ ip_target | default (' ') }}"
+  shostname: "{{ shostname | default (' ') }}"
+
+epel_url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+easy_rsa:
+  repo_url: https://github.com/OpenVPN/easy-rsa.git
+  tmp_path: /tmp/CA
+  
+open_vpn:
+  _ip_mask: " "              # 255.255.255.0
+  _ip_mask_alt: " "          # /24
+  _ip_pool: " "              # 10.89.0.0
+  dir_path: /etc/openvpn
+  usr_name: ovpn
+  cust_dns: 
+    - "1.1.1.1"
+  protocol: udp
+  vpn_port: 1194
+
+get_conf:
+  cfg__dir: ../../../helpers
+  cfg_path: ../../../config
+  cfg_name: "{{ shostname }}.ovpn"
+
+iptables:
+  cfg_path: /etc/sysconfig/iptables

@@ -1,0 +1,8 @@
+---
+
+- hosts: tag_Role_open_vpn
+  vars_files:
+    - ../../common_vars/common.yml
+  roles:
+    - get_conf
+  gather_facts: no

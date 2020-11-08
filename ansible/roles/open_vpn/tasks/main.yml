@@ -1,0 +1,13 @@
+---
+
+- name: set user
+  include_tasks: >-
+    user.yml
+
+- name: install ovpn
+  include_tasks: >-
+    ovpn.yml
+
+- name: clean up
+  include_tasks: >-
+    clean.yml

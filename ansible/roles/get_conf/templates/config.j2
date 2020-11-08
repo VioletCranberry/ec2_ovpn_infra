@@ -1,0 +1,28 @@
+{% set root = playbook_dir + '/' + get_conf.cfg_path + '/open_vpn/etc/openvpn' %}
+
+client
+dev tun
+proto {{ open_vpn.protocol }}
+remote {{ _dynamic.ip_target }} {{ open_vpn.vpn_port }}
+ca {{ root }}/client/ca.crt
+cert {{ root }}/client/{{ _dynamic.shostname }}.crt
+key {{ root }}/client/{{ _dynamic.shostname }}.key
+tls-version-min 1.2
+tls-cipher TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA256
+cipher AES-128-CBC
+auth SHA512
+resolv-retry infinite
+auth-retry none
+nobind
+persist-key
+persist-tun
+remote-cert-tls server
+verb 3
+tls-client
+tls-auth {{ root }}/server/ta.key 1
+
+mssfix 1100
+tun-mtu 1100
+fast-io
+fragment 1100
+compress lz4-v2

@@ -1,0 +1,56 @@
+{% set server_dir = open_vpn.dir_path + '/server' %}
+
+dev tun0
+proto {{ open_vpn.protocol }}4
+port {{ open_vpn.vpn_port }}
+keepalive 10 120
+max-clients 1024
+
+ca {{ server_dir }}/ca.crt
+cert {{ server_dir }}/{{ inventory_hostname }}.crt
+key {{ server_dir }}/{{ inventory_hostname }}.key
+dh {{ server_dir }}/dh.pem
+tls-auth {{ server_dir }}/ta.key 0
+
+reneg-sec 0
+remote-cert-tls client
+crl-verify {{ server_dir }}/crl.pem
+tls-version-min 1.2
+cipher AES-128-CBC
+auth SHA512
+tls-server
+tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA256:TLS-DHE-RSA-WITH-AES-128-GCM-SHA256:TLS-DHE-RSA-WITH-AES-128-CBC-SHA256
+
+user {{ open_vpn.usr_name }}
+group {{ open_vpn.usr_name }}
+
+server {{ open_vpn._ip_pool }} {{ open_vpn._ip_mask }} 
+topology subnet
+ifconfig-pool-persist ipp.txt
+client-config-dir {{ open_vpn.dir_path }}
+
+persist-key
+persist-tun
+
+push "redirect-gateway def1 bypass-dhcp"
+
+{% for _dns in open_vpn.cust_dns %}
+push "dhcp-option DNS {{ _dns }}"
+{% endfor %}
+
+# Logging
+log-append /var/log/openvpn.log
+verb 3
+
+# UDP tweaks
+mssfix 1100
+tun-mtu 1100
+fast-io
+fragment 1100
+compress lz4-v2
+push "compress lz4-v2"
+txqueuelen 1000
+sndbuf 393216
+rcvbuf 393216
+push "sndbuf 393216"
+push "rcvbuf 393216"

@@ -1,0 +1,65 @@
+---
+
+- name: set exec path
+  set_fact: 
+    _path: "{{ easy_rsa.tmp_path }}/easyrsa3"
+
+- name: install git
+  yum:
+    state: latest
+    name: "git"
+
+- name: get easy-rsa
+  git: 
+    repo: "{{ easy_rsa.repo_url }}"
+    dest: "{{ easy_rsa.tmp_path }}"
+    force: yes
+
+- name: init easy-rsa
+  command:
+    argv: 
+      - "./easyrsa"
+      - "init-pki"
+    chdir: "{{ _path }}"
+    stdin: "yes"
+
+- name: build CA
+  command:
+    argv:
+      - "./easyrsa" 
+      - "build-ca"
+      - "nopass"
+    chdir: "{{ _path }}"
+    stdin: "{{ inventory_hostname }}"
+
+- name: build DH
+  command:
+    argv:
+      - "./easyrsa"
+      - "gen-dh"
+    chdir: "{{ _path }}"
+
+- name: server - keys
+  command:
+    argv:
+      - "./easyrsa"
+      - "build-server-full"
+      - "{{ inventory_hostname }}"
+      - "nopass"
+    chdir: "{{ _path }}"
+
+- name: client - keys
+  command:
+    argv:
+      - "./easyrsa"
+      - "build-client-full"
+      - "{{ _dynamic.shostname }}"
+      - "nopass"
+    chdir: "{{ _path }}"
+
+- name: build crl
+  command:
+    argv:
+      - "./easyrsa"
+      - "gen-crl"
+    chdir: "{{ _path }}"

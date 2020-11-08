@@ -1,0 +1,6 @@
+---
+
+- name: clean up CA
+  file:
+    state: absent
+    path: "{{ easy_rsa.tmp_path }}"

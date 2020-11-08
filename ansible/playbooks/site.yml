@@ -1,0 +1,26 @@
+---
+
+- name: set_vars role
+  tags: set_vars
+  import_playbook: >- 
+    role/set_vars.yml
+
+- name: easy_rsa role
+  tags: easy_rsa
+  import_playbook: >- 
+    role/easy_rsa.yml
+
+- name: open_vpn role
+  tags: open_vpn
+  import_playbook: >- 
+    role/open_vpn.yml
+
+- name: iptables role
+  tags: iptables
+  import_playbook: >- 
+    role/iptables.yml
+
+- name: get_conf role
+  tags: get_conf
+  import_playbook: >- 
+    role/get_conf.yml

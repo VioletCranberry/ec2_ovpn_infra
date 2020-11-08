@@ -1,0 +1,29 @@
+*nat
+
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+
+-A POSTROUTING -s {{ open_vpn._ip_pool }}{{ open_vpn._ip_mask_alt }} -o eth0 -j MASQUERADE
+
+COMMIT
+
+*filter
+
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -i tun0 -j ACCEPT
+-A INPUT -p tcp -s {{ _dynamic.ip_source }} --dport 22 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p {{ open_vpn.protocol }} -s {{ _dynamic.ip_source }} --dport {{ open_vpn.vpn_port }} -m state --state NEW,ESTABLISHED -j ACCEPT
+
+-A FORWARD -i tun0 -o eth0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -i eth0 -o tun0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -i tun0 -s {{ open_vpn._ip_pool }}{{ open_vpn._ip_mask_alt }} -d {{ open_vpn._ip_pool }}{{ open_vpn._ip_mask_alt }} -j DROP
+-A FORWARD -i tun0 -s {{ open_vpn._ip_pool }}{{ open_vpn._ip_mask_alt }} -d 0.0.0.0/0 -m conntrack --ctstate NEW -j ACCEPT
+
+COMMIT

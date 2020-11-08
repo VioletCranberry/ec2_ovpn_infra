@@ -1,0 +1,18 @@
+---
+
+- hosts: tag_Role_open_vpn
+  vars_files:
+    - ../../common_vars/common.yml
+  roles:
+    - set_vars
+  gather_facts: no
+  
+  pre_tasks:
+    - name: update all
+      yum:
+        state: latest
+        name: '*'
+    - name: setup reqs
+      yum:
+        state: present
+        name: "{{ epel_url }}"

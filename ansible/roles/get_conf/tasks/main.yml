@@ -1,0 +1,24 @@
+---
+
+- name: config - find 
+  find: 
+    paths: 
+      - "{{ open_vpn.dir_path }}"
+    patterns: "*.crt,*.key"
+    recurse: yes
+  register: files_to_copy
+
+- name: config - get
+  fetch: 
+    dest: >-
+      "{{ playbook_dir }}/{{ get_conf.cfg_path }}"
+    src: "{{ item.path }}"
+  with_items: 
+    - "{{ files_to_copy.files }}"
+
+- name: config - make
+  template:
+    dest: "{{ playbook_dir }}/{{ get_conf.cfg__dir }}/{{ get_conf.cfg_name }}"
+    src: "config.j2"
+  delegate_to: localhost
+  become: no

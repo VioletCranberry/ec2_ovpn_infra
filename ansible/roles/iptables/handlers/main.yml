@@ -1,0 +1,9 @@
+---
+
+- name: reload systemd
+  become: yes
+  systemd:
+    daemon_reload: true
+
+- name: restart iptables
+  shell: "iptables-restore <{{ iptables.cfg_path }}"

@@ -1,0 +1,21 @@
+---
+
+- name: fetch public ip - source
+  delegate_to: localhost
+  become: no
+  uri:
+    url: "http://ifconfig.me/ip"
+    return_content: yes
+  register: ip_source
+
+- name: fetch public ip - target
+  uri:
+    url: "http://ifconfig.me/ip"
+    return_content: yes
+  register: ip_target
+
+- name: set facts
+  set_fact:
+    ip_source: "{{ ip_source.content }}"
+    ip_target: "{{ ip_target.content }}"
+    shostname: "{{ lookup('pipe', 'hostname') }}"

@@ -1,0 +1,38 @@
+---
+
+- name: install iptables-services
+  yum:
+    name:
+      - iptables-services
+    state: latest
+
+- name: insert iptables template
+  template:
+    dest: "{{ iptables.cfg_path }}"
+    src: iptables.conf.j2
+    owner: root
+    group: root
+    mode: 0644
+  notify: 
+    - restart iptables
+
+- name: enable iptables service
+  service:
+    name: iptables
+    enabled: yes
+    state: started
+
+- name: set ip forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: yes
+
+- name: disable ipv6
+  sysctl:
+    name: "{{ item }}"
+    value: '1'
+    sysctl_set: yes
+  with_items:
+    - net.ipv6.conf.all.disable_ipv6
+    - net.ipv6.conf.default.disable_ipv6

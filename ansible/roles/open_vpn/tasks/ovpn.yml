@@ -1,0 +1,81 @@
+---
+
+- name: get openvpn 
+  yum:
+    name: "openvpn"
+    state: latest
+
+- name: set copy paths
+  set_fact: 
+    __path: "{{ easy_rsa.tmp_path }}/easyrsa3/pki"
+    server: "{{ open_vpn.dir_path }}/server"
+    client: "{{ open_vpn.dir_path }}/client"
+ 
+- name: set server key and cert
+  copy:
+    remote_src: yes
+    mode: 0600
+    src: "{{ __path }}/{{ item.src }}"
+    dest: "{{ server }}/{{ item.dest }}"
+    owner: "{{ open_vpn.usr_name }}"
+    group: "{{ open_vpn.usr_name }}"
+  with_items:
+    - { src: "ca.crt", dest: "ca.crt"}
+    - { src: "issued/{{ inventory_hostname }}.crt",
+        dest: "{{ inventory_hostname }}.crt"}
+    - { src: "private/{{ inventory_hostname }}.key",
+        dest: "{{ inventory_hostname }}.key"}     
+
+- name: set client key and cert
+  copy:
+    remote_src: yes
+    mode: 0600
+    src: "{{ __path }}/{{ item.src }}"
+    dest: "{{ client }}/{{ item.dest }}"
+    owner: "{{ open_vpn.usr_name }}"
+    group: "{{ open_vpn.usr_name }}"
+  with_items:
+    - { src: "ca.crt", dest: "ca.crt"}
+    - { src: "issued/{{ shostname }}.crt",
+        dest: "{{ shostname }}.crt"}
+    - { src: "private/{{ shostname }}.key",
+        dest: "{{ shostname }}.key"}
+
+- name: copy DH and CRL key
+  copy:
+    remote_src: yes
+    mode: 0600
+    owner: "{{ open_vpn.usr_name }}"
+    group: "{{ open_vpn.usr_name }}"
+    src: "{{ __path }}/{{ item.src }}"
+    dest: "{{ server }}/{{ item.dest }}"
+  with_items:
+    - { src: "crl.pem", dest: "crl.pem"}
+    - { src: "dh.pem", dest: "dh.pem"}
+
+- name: generate TLS key
+  command:
+    argv:
+      - "openvpn" 
+      - "--genkey" 
+      - "--secret"
+      - "ta.key"
+    creates: "{{ server }}/ta.key"
+    chdir: "{{ server }}"
+
+- name: copy ovpn config
+  template:
+    dest: "/etc/openvpn/server.conf"
+    src: "server.conf.j2"
+    owner: "{{ open_vpn.usr_name }}"
+    group: "{{ open_vpn.usr_name }}"
+    mode: 0644
+  notify:
+    - restart openvpn
+
+- name: enable openvpn service
+  service:
+    name: openvpn@server
+    enabled: yes
+    state: started
+ 
